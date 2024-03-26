@@ -1,0 +1,511 @@
+#include<conio.h>
+#include<graphics.h>
+#include<math.h>
+#include "FF.h"
+#include "SC.h"
+
+# define m 11
+# define n 2
+
+int s_r = 1;
+int angle;
+
+int Q_x[1][2] = {0};
+int Q_y[1][2] = {0};
+
+void quadrant()
+{
+ int x,y;
+ x = getmaxx()/2;
+ y = getmaxy();
+ Q_x[0][0] = x;
+
+ Q_y[0][1] = y;
+
+ line(0,y/2,getmaxx(),y/2);
+ line(x,0,x,getmaxy());
+}
+
+void rect(int x1, int y1, int x2, int y2)
+{
+ BL(x1,y1,x2,y1);
+ BL(x2,y1,x2,y2);
+ BL(x1,y1,x1,y2);
+ BL(x1,y2,x2,y2);
+}
+
+int poly3[5][2] = {
+		   {100,100},
+		   {75,170},
+		   {135,215},
+		   {195,170},
+		   {170,100}
+		   };
+
+int poly2[m][n] = {
+		   {100,100},
+		   {75,170},
+		   {135,215},
+		   {195,170},
+		   {170,100},
+		   {135,150},  // outer circle
+		   {120,144},  // for left eye
+		   {150,144},  // for right eye
+		   {126,162},  // mouth start
+		   {144,163},  // mouth end
+		   {105,102}   // poly color
+
+		  };
+
+int T[1][2] = {300,0};    //tx,ty
+
+int S[2][2] = {{2,0},     // sx,0
+	       {0,2}      // 0,sy
+	      };
+
+int SH[2][2] = {{1,0},         //1, shy
+		{1,1}          //shx, 1
+	       };
+
+int RF_x[2][2] = {{1,0},       // rfx,0
+		  {0,-1}       //  0,rfy
+		 };
+
+int RF_y[2][2] = {{-1,0},       // rfx,0
+		  {0,1}       //  0,rfy
+		 };
+
+int RF_xy[2][2] = {{-1,0},       // rfx,0
+		  {0,-1}       //  0,rfy
+		 };
+
+
+void tl()
+{
+ int i,j,tx,ty;
+ printf("\nEnter Tx,Ty: ");
+ scanf("%d%d",&tx,&ty);
+ T[0][0] = tx;
+ T[0][1] = ty;
+ for (i = 0; i<m; i++)
+ {
+  for(j = 0; j<n; j++)
+  {
+   poly2[i][j] = poly2[i][j] + T[0][j];
+  }
+ }
+}
+
+void sl()
+{
+  int i,j,k,sx,sy;
+  int mul[m][n];
+
+  printf("\nEnter Sx,Sy: ");
+ scanf("%d%d",&sx,&sy);
+ S[0][0] = sx;
+ S[1][1] = sy;
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    mul[i][j] = 0;
+    for (k = 0; k<n; k++)
+    {
+     mul[i][j] += poly2[i][k] * S[k][j];
+    }
+   }
+  }
+
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    poly2[i][j] = mul[i][j];
+   }
+  }
+}
+
+void sh()
+{
+  int i,j,k,shx,shy;
+  int mul[m][n];
+
+  printf("\nEnter Shx,Shy: ");
+ scanf("%d%d",&shx,&shy);
+ SH[0][1] = shy;
+ SH[1][0] = shx;
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    mul[i][j] = 0;
+    for (k = 0; k<n; k++)
+    {
+     mul[i][j] += poly2[i][k] * SH[k][j];
+    }
+   }
+  }
+
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    poly2[i][j] = mul[i][j];
+   }
+  }
+}
+
+void rf_x()
+{
+ int i,j,k;
+ int mul[m][n];
+
+
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    mul[i][j] = 0;
+    for (k = 0; k<n; k++)
+    {
+     mul[i][j] += poly2[i][k] * RF_x[k][j];
+    }
+   }
+  }
+
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    poly2[i][j] = abs(abs(mul[i][j]) - Q_y[0][j]);
+   }
+  }
+}
+
+void rf_y()
+{
+ int i,j,k;
+ int mul[m][n];
+
+
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    mul[i][j] = 0;
+    for (k = 0; k<n; k++)
+    {
+     mul[i][j] += poly2[i][k] * RF_y[k][j];
+    }
+   }
+  }
+
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    poly2[i][j] = abs(abs(mul[i][j]) - Q_x[0][j]);
+   }
+  }
+}
+
+
+void rf_xy()
+{
+ int i,j,k;
+ int mul[m][n];
+
+
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    mul[i][j] = 0;
+    for (k = 0; k<n; k++)
+    {
+     mul[i][j] += poly2[i][k] * RF_y[k][j];
+    }
+   }
+  }
+
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    poly2[i][j] = abs(abs(mul[i][j]) - Q_x[0][j]);
+   }
+  }
+
+
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    mul[i][j] = 0;
+    for (k = 0; k<n; k++)
+    {
+     mul[i][j] += poly2[i][k] * RF_y[k][j];
+    }
+   }
+  }
+
+  for (i = 0; i<m; i++)
+  {
+   for (j = 0; j<n; j++)
+   {
+    poly2[i][j] = abs(abs(mul[i][j]) - Q_x[0][j]);
+   }
+  }
+}
+
+void cor_reset()
+{
+ int i,j;
+ for (i = 0; i<5;i++)
+ {
+  for (j = 0 ; j<2;j++)
+  {
+   poly3[i][j] = poly2[i][j];
+  }
+ }
+}
+
+void poly1()
+{
+ setfillstyle(SOLID_FILL,9);
+ line(poly2[0][0],poly2[0][1],poly2[1][0],poly2[1][1]);
+ line(poly2[1][0],poly2[1][1],poly2[2][0],poly2[2][1]);
+ line(poly2[2][0],poly2[2][1],poly2[3][0],poly2[3][1]);
+ line(poly2[3][0],poly2[3][1],poly2[4][0],poly2[4][1]);
+ line(poly2[4][0],poly2[4][1],poly2[0][0],poly2[0][1]);										     // floodfill(poly2[10][0],poly2[10][1],15);
+ cor_reset();
+ scanLineFill(5,&poly3,LIGHTBLUE);
+
+}
+
+void emoji()
+{
+ // out frame
+ setfillstyle(SOLID_FILL,14);
+ circle(poly2[5][0],poly2[5][1],30*s_r);
+ floodfill(poly2[5][0],poly2[5][1],15);
+
+ //left eye
+ setfillstyle(SOLID_FILL,0);
+ circle(poly2[6][0],poly2[6][1],5*s_r);
+ floodFill(poly2[6][0],poly2[6][1],0,15);
+
+ // right eye
+ setfillstyle(SOLID_FILL,0);
+ circle(poly2[7][0],poly2[7][1],5*s_r);
+ floodFill(poly2[7][0],poly2[7][1],0,15);
+
+ // mouth
+ //setcolor(0);
+ setfillstyle(SOLID_FILL,0);
+ rectangle(poly2[8][0],poly2[8][1],poly2[9][0],poly2[9][1]);
+ floodfill(poly2[8][0],poly2[8][1],14);
+}
+
+
+
+
+
+int my_round(double num) {
+    return (num >= 0) ? (int)(num + 0.5) : (int)(num - 0.5);
+}
+
+void rotatePolygon(double angle, int poly[][n], int vertices) {
+    double theta = angle * M_PI / 180.0;
+    int translatedX,translatedY,rotatedX,rotatedY,i,x,y, cx = 140, cy = 110;
+
+    for ( i = 0; i < vertices; ++i) {
+	 x = poly[i][0];
+	 y = poly[i][1];
+
+
+	 translatedX = x - cx;
+	 translatedY = y - cy;
+
+
+	 rotatedX = my_round(translatedX * cos(theta) - translatedY * sin(theta));
+	 rotatedY = my_round(translatedX * sin(theta) + translatedY * cos(theta));
+
+
+	poly[i][0] = rotatedX + cx;
+	poly[i][1] = rotatedY + cy;
+
+	//poly2[i][0] = poly[i][0];
+	//poly2[i][1] = poly[i][1];
+    }
+}
+void drawPolygon(int vertices, int poly[][n]) {
+    int i;
+    setfillstyle(SOLID_FILL,RED);
+    for ( i = 0; i < vertices-1; ++i){
+   line(poly[i][0],poly[i][1],poly[i+1][0],poly[i+1][1]);
+    }
+    line(poly[0][0],poly[0][1],poly[4][0],poly[4][1]);
+    //floodfill(100,30,15);
+    emoji();
+}
+
+
+
+void rotatePoint(int *x, int *y, int cx, int cy, float theta) {
+    float radian = theta * (M_PI / 180);
+    int new_x = cx + (*x - cx) * cos(radian) - (*y - cy) * sin(radian);
+    int new_y = cy + (*x - cx) * sin(radian) + (*y - cy) * cos(radian);
+    *x = new_x;
+    *y = new_y;
+}
+
+void q_wise()
+{
+ int i,j;
+ for (i = 0; i<m;i++)
+ {
+  for (j = 0; j<n; j++)
+  {
+   poly2[i][j] = poly2[i][j] + Q_x[0][j];
+  }
+ }
+}
+
+void original()
+{
+ // for reflection
+ //q_wise();
+ poly1();
+ emoji();
+}
+
+void translation()
+{
+ cleardevice();
+ quadrant();
+ tl();
+ poly1();
+ emoji();
+}
+
+void scaling()
+{
+ cleardevice();
+ //quadrant();
+ sl();
+ poly1();
+ if (S[0][0] == 1)
+ {
+  s_r = S[1][1];
+ }
+ else if(S[1][1] == 1)
+ {
+  s_r = S[0][0];
+ }
+ else
+ {
+  s_r = S[0][0];
+ }
+ emoji();
+}
+
+void reflection()
+{
+ int choi;
+ printf("\n1. reflection on x-axis \n2. reflection on y-axis \n3. reflection on x-y axis :");
+ scanf("%d",&choi);
+ cleardevice();
+ quadrant();
+
+ if (choi == 1)
+ {
+  rf_x();
+ }
+ else if(choi == 2)
+ {
+  rf_y();
+ }
+ else if(choi == 3)
+ {
+  rf_x();
+  rf_y();
+ }
+
+ poly1();
+ emoji();
+}
+
+void sharing()
+{
+ cleardevice();
+ //quadrant();
+ sh();
+ poly1();
+ emoji();
+}
+
+void main()
+{
+ int gd = DETECT,gm;
+ int x,y,choi;
+ initgraph(&gd,&gm,"C:\\TURBOC3\\BGI");
+
+ quadrant();
+ //original();
+ //getch();
+
+ printf("\n---menu---");
+ printf("\n1. Translation \n2. Scaling \n3.Reflection \n4. Shearing :");
+ scanf("%d",&choi);
+
+ switch (choi)
+ {
+  case 1:
+    original();
+    getch();
+    translation();
+    break;
+
+  case 2:
+    original();
+    getch();
+    scaling();
+    break;
+
+  case 3:
+    q_wise();
+    original();
+    getch();
+    reflection();
+    break;
+
+  case 4:
+    original();
+    getch();
+    sharing();
+    break;
+
+  case 5:
+    printf("angle:");
+    scanf("%d", &angle);
+    rotatePolygon(angle, poly2, 5);
+    drawPolygon(5, poly2);
+    break;
+
+  default:
+    printf("\nInvalid input");
+ }
+
+ //translation();
+
+ //scaling();
+
+ //reflection();
+
+ //sharing();
+
+ getch();
+ closegraph();
+}
