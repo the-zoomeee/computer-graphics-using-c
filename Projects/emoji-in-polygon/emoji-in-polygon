@@ -26,14 +26,6 @@ void quadrant()
  line(x,0,x,getmaxy());
 }
 
-void rect(int x1, int y1, int x2, int y2)
-{
- BL(x1,y1,x2,y1);
- BL(x2,y1,x2,y2);
- BL(x1,y1,x1,y2);
- BL(x1,y2,x2,y2);
-}
-
 int poly3[5][2] = {
 		   {100,100},
 		   {75,170},
@@ -302,7 +294,6 @@ void emoji()
  floodFill(poly2[7][0],poly2[7][1],0,15);
 
  // mouth
- //setcolor(0);
  setfillstyle(SOLID_FILL,0);
  rectangle(poly2[8][0],poly2[8][1],poly2[9][0],poly2[9][1]);
  floodfill(poly2[8][0],poly2[8][1],14);
@@ -335,9 +326,6 @@ void rotatePolygon(double angle, int poly[][n], int vertices) {
 
 	poly[i][0] = rotatedX + cx;
 	poly[i][1] = rotatedY + cy;
-
-	//poly2[i][0] = poly[i][0];
-	//poly2[i][1] = poly[i][1];
     }
 }
 void drawPolygon(int vertices, int poly[][n]) {
@@ -347,7 +335,7 @@ void drawPolygon(int vertices, int poly[][n]) {
    line(poly[i][0],poly[i][1],poly[i+1][0],poly[i+1][1]);
     }
     line(poly[0][0],poly[0][1],poly[4][0],poly[4][1]);
-    //floodfill(100,30,15);
+    floodfill(poly2[10][0],poly2[10][1],15);
     emoji();
 }
 
@@ -375,8 +363,6 @@ void q_wise()
 
 void original()
 {
- // for reflection
- //q_wise();
  poly1();
  emoji();
 }
@@ -393,7 +379,6 @@ void translation()
 void scaling()
 {
  cleardevice();
- //quadrant();
  sl();
  poly1();
  if (S[0][0] == 1)
@@ -414,7 +399,7 @@ void scaling()
 void reflection()
 {
  int choi;
- printf("\n1. reflection on x-axis \n2. reflection on y-axis \n3. reflection on x-y axis :");
+ printf("\n1. reflection on x-axis \n2. reflection on y-axis \n3. reflection on xy-axis :");
  scanf("%d",&choi);
  cleardevice();
  quadrant();
@@ -440,7 +425,6 @@ void reflection()
 void sharing()
 {
  cleardevice();
- //quadrant();
  sh();
  poly1();
  emoji();
@@ -453,12 +437,11 @@ void main()
  initgraph(&gd,&gm,"C:\\TURBOC3\\BGI");
 
  quadrant();
- //original();
- //getch();
 
  printf("\n---menu---");
- printf("\n1. Translation \n2. Scaling \n3.Reflection \n4. Shearing :");
+ printf("\n1. Translation \n2. Scaling \n3. Reflection \n4. Shearing \n5. Rotation :");
  scanf("%d",&choi);
+ cleardevice();
 
  switch (choi)
  {
@@ -497,15 +480,6 @@ void main()
   default:
     printf("\nInvalid input");
  }
-
- //translation();
-
- //scaling();
-
- //reflection();
-
- //sharing();
-
  getch();
  closegraph();
 }
